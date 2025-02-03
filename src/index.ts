@@ -1,8 +1,9 @@
 import express from "express";
 
-import { AppDataSource } from "./src/data-source";
-import { ToDo } from "./src/entity/ToDo";
-import { ToDoController } from "./src/controller/todo.controller";
+import { AppDataSource } from "./data-source";
+import { ToDo } from "./entity/todo";
+import { ToDoController } from "./controller/todo.controller";
+import { UserController } from "./controller/user.controller";
 
 const app = express();
 app.use(express.json());
@@ -11,7 +12,8 @@ const port = process.env.PORT || 3000;
 const todoController = new ToDoController();
 app.use("/todo", todoController.router);
 
-
+const userController = new UserController();
+app.use("/user", userController.router);
 // app.get("/", (req, res) => {
 //   const toDoRep = AppDataSource.getRepository(ToDo);
 //   const toDo = new ToDo();

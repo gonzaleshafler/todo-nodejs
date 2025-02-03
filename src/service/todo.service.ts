@@ -1,4 +1,4 @@
-import { ToDo } from "../entity/ToDo";
+import { ToDo } from "../entity/todo";
 import { AppDataSource } from "../data-source";
 
 export class ToDoService {
