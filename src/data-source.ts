@@ -1,6 +1,8 @@
 import { DataSource } from "typeorm";
-import { ToDo } from "./entity/todo";
-import { User } from "./entity/user";
+import { Task } from "./repositories/entities/task";
+import { WorkspaceMember } from "./repositories/entities/workspace-members";
+import { User } from "./repositories/entities/user";
+import { Workspace } from "./repositories/entities/workspace";
 
 require("dotenv").config();
 
@@ -10,7 +12,7 @@ export const AppDataSource = new DataSource({
   port: parseInt(process.env.DB_PORT || "5432"),
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  entities: [ToDo, User],
+  entities: [Task, User, Workspace, WorkspaceMember],
   synchronize: true,
   logging: false,
 });

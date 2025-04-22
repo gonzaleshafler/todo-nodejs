@@ -1,33 +1,61 @@
 import jwt from "jsonwebtoken";
-import { User } from "../entity/user";
+import { User } from "../repositories/entities/user";
 import { AppDataSource } from "../data-source";
 import { compare, hash } from "bcrypt";
+import { UserRepositoryService } from "../repositories/users/user-repository.service";
+import { SignUpDto } from "../auth/dto/sign-up.dto";
+import { SignInDto } from "../auth/dto/sign-in.dto";
 
 export class UserService {
-  private userRepository = AppDataSource.getRepository(User);
+  constructor(private userRepository: UserRepositoryService) {}
 
-  async createUser(name: string, email: string, password: string) {
-    if (await this.userRepository.findOneBy({ email }))
+  async createUser(data: SignUpDto) {
+    if (await this.userRepository.getByEmail(data.email))
       throw new Error("User already exists");
-    const user = new User();
-    user.name = name;
-    user.email = email;
-    user.password = await hash(password, 10).catch((err) => {"Error hashing password"});
-    this.userRepository.save(user);
-    return this.generateToken(user.email);
+    console.log(data);
+    const user = await this.userRepository.create(data);
+    return await this.generateToken(data.email, user.id);
   }
 
-  async loginUser(email: string, password: string) {
-    const user = await this.userRepository.findOneBy({ email });
-    if (user && (await compare(password, user.password))) {
-      return this.generateToken(user.email);
+  async loginUser(data: SignInDto) {
+    const user = await this.userRepository.getByEmail(data.email);
+    if (user && (await compare(data.password, user.password))) {
+      return this.generateToken(user.email, user.id);
     }
     throw new Error("Invalid email or password");
   }
 
-  private generateToken(email: string) {
+  async getUserById(id: number) {
+    return (
+      (await this.userRepository.getById(id)) ??
+      Promise.reject(new Error("User not found"))
+    );
+  }
+
+  async getUserByEmail(email: string) {
+    return (
+      (await this.userRepository.getByEmail(email)) ??
+      Promise.reject(new Error("User not found"))
+    );
+  }
+
+  async updateUser(id: number, updateData: Partial<User>) {
+    if (!await this.userRepository.getById(id))
+      throw new Error("User not exists");
+    return await this.userRepository.update(id, updateData);
+  }
+
+  async deleteUser(id: number) {
+    const user = await this.userRepository.getById(id);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    return this.userRepository.delete(id);
+  }
+
+  private generateToken(email: string, id: number) {
     return jwt.sign(
-      { email , usefulData: "AMOGUS"},
+      { id, email, usefulData: "AMOGUS" },
       process.env.JWT_SECRET as string,
       { expiresIn: "1h" },
     );

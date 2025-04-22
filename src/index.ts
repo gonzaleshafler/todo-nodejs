@@ -1,19 +1,40 @@
 import express from "express";
 
-import { AppDataSource } from "./data-source";
-import { ToDo } from "./entity/todo";
-import { ToDoController } from "./controller/todo.controller";
+import { TaskController } from "./controller/task.controller";
 import { UserController } from "./controller/user.controller";
+import { WorkspaceController } from "./controller/workspace.controller";
+import { WorkspaceMemberController } from "./controller/worskace-member.controller";
+import { UserService } from "./service/user.service";
+import { UserRepositoryService } from "./repositories/users/user-repository.service";
+import { WorkspaceService } from "./service/workspace.service";
+import { WorkspaceRepositoryService} from "./repositories/workspaces/workspace-repository.service";
+import { WorkspaceMemberService } from "./service/workspace-member.service";
+import { WorkspaceMemberRepository } from "./repositories/workspace-members/workspace-member-repository.service";
 
 const app = express();
 app.use(express.json());
 const port = process.env.PORT || 3000;
 
-const todoController = new ToDoController();
-app.use("/todo", todoController.router);
+//const taskController = new TaskController();
+//app.use("/", taskController.router);
 
-const userController = new UserController();
-app.use("/user", userController.router);
+
+
+const userService = new UserService(new UserRepositoryService());
+const userController = new UserController(userService);
+app.use("/users", userController.router);
+
+
+
+const workspaceMemberService = new WorkspaceMemberService(new WorkspaceMemberRepository());
+const workspaceMemberController = new WorkspaceMemberController();
+app.use("/", workspaceMemberController.router);
+const workspaceService = new WorkspaceService(new WorkspaceRepositoryService(), workspaceMemberService, userService)
+const workspaceController = new WorkspaceController(workspaceService);
+app.use("/workspaces", workspaceController.router);
+
+const taskController = new TaskController();
+app.use("/", taskController.router);
 // app.get("/", (req, res) => {
 //   const toDoRep = AppDataSource.getRepository(ToDo);
 //   const toDo = new ToDo();
