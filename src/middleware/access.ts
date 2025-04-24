@@ -11,7 +11,7 @@ const jwt = require("jsonwebtoken");
 async function checkAccess(req, res, next) {
   const token = req.header("Authorization");
   if (!token) return res.status(403).json({ error: "Access denied" });
-  const workspaceId = parseInt(req.params.id) || req.body.workspaceId;
+  const workspaceId = parseInt(req.params.workspaceId) || req.body.workspaceId;
 
   if (!workspaceId) {
     return res.status(400).json({ error: "Workspace ID is required" });

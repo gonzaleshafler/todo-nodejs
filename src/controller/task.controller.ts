@@ -7,6 +7,7 @@ import { WorkspaceMemberRepository } from "../repositories/workspace-members/wor
 import { CreateTaskDto } from "../repositories/dto/CreateTaskDto";
 import { UpdateTaskDto } from "../repositories/dto/UpdateTaskDto";
 import { TaskResponseDto } from "../repositories/dto/TaskResponseDto";
+import { checkAccess } from "../middleware/access";
 
 export class TaskController {
   public router = Router();
@@ -27,7 +28,7 @@ export class TaskController {
     );
     this.router.put(
       "/workspaces/:workspaceId/tasks/:taskId",
-      verifyToken,
+      verifyToken,checkAccess,
       this.update.bind(this),
     );
     this.router.delete(
@@ -59,12 +60,8 @@ export class TaskController {
 
   private async create(req: AuthenticatedRequest, res: Response) {
     try {
-      const workspaceId = parseInt(req.params.workspaceId);
-      const createTaskDto = new CreateTaskDto({ ...req.body, workspaceId, createdById: req.user.id });
-      console.log("createTaskDto", createTaskDto);
-      const newTask = await this.taskService.createTask(createTaskDto, createTaskDto.createdById);
-      const responseDto = new TaskResponseDto(newTask);
-      res.status(201).json(responseDto);
+      const createTaskDto = new CreateTaskDto({ ...req.body, workspaceId: req.params.workspaceId, createdById: req.user.id });
+      res.status(201).json(new TaskResponseDto(await this.taskService.createTask(createTaskDto, createTaskDto.createdById)));
     } catch (err) {
       res.status(400).json({ message: err.message });
     }
@@ -72,11 +69,8 @@ export class TaskController {
 
   private async update(req: AuthenticatedRequest, res: Response) {
     try {
-      const taskId = parseInt(req.params.taskId);
-      const updateTaskDto = new UpdateTaskDto({ ...req.body, id: taskId });
-      const updatedTask = await this.taskService.updateTask(updateTaskDto);
-      const responseDto = new TaskResponseDto(updatedTask);
-      res.status(200).json(responseDto);
+      const updateTaskDto = new UpdateTaskDto({ id: req.params.taskId, ...req.body, createdById: req.user.id });
+      res.status(200).json(new TaskResponseDto(await this.taskService.updateTask(updateTaskDto)));
     } catch (err) {
       res.status(400).json({ message: err.message });
     }

@@ -5,6 +5,9 @@ export class UpdateTaskDto {
   title?: string;
   description?: string;
   status?: string;
+  createdBy?: number;
+  assignedTo?: number;
+  parentTask?: number;
 
   constructor(data: Partial<UpdateTaskDto>) {
     Object.assign(this, data);

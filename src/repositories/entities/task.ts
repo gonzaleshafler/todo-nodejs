@@ -56,5 +56,6 @@ export class Task {
   @ManyToOne(()=>WorkspaceMember,{nullable:true})
   @JoinColumn({name:"assigned_to"})
   assignedTo:WorkspaceMember|null;
+  task: { id: number; };
   
 }
