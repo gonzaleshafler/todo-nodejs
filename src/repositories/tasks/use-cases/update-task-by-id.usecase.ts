@@ -1,11 +1,11 @@
 import { AppDataSource } from "../../../data-source";
-import { TaskDto } from "../../dto/TaskDto";
+import { UpdateTaskDto } from "../../dto/UpdateTaskDto";
 import { Task } from "../../entities/task";
 
 export class UpdateTaskById {
   private taskRepository = AppDataSource.getRepository(Task);
 
-  async exec(taskData: TaskDto) {
+  async exec(taskData: UpdateTaskDto): Promise<Task> {
     return await this.taskRepository.save(taskData);
   }
 }

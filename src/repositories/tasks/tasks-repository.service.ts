@@ -1,4 +1,6 @@
-import { TaskDto } from "../dto/TaskDto";
+
+import { CreateTaskDto } from "../dto/CreateTaskDto";
+import { UpdateTaskDto } from "../dto/UpdateTaskDto";
 import { Task } from "../entities/task";
 import { CreateTaskUseCase } from "./use-cases/create-task.usecase";
 import { GetTaskById } from "./use-cases/get-task-by-id.usecase";
@@ -20,15 +22,15 @@ export class TaskRepositoryService {
     this.getTaskById = new GetTaskById();
     this.updateTaskById = new UpdateTaskById();
   }
-  async create(taskData : TaskDto) {
-    return this.createTaskUseCase.exec(taskData);
+  
+  async create(taskData : CreateTaskDto) {
+    return this.createTaskUseCase.exec(taskData.toEntity());
   }
 
   async getByAssignedId(userId: number)
   {
     return this.getTasksByAssignedUserId.exec(userId);
   }
-
 
   async getByWorkspaceId(workspaceId: number)
   {
@@ -43,7 +45,7 @@ export class TaskRepositoryService {
   {
     return this.getTasksByCreatorUserId.exec(userId);
   }
-  async update(taskData: TaskDto)
+  async update(taskData: UpdateTaskDto)
   {
     return this.updateTaskById.exec(taskData);
   }

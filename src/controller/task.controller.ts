@@ -4,12 +4,13 @@ import { AuthenticatedRequest, verifyToken } from "../middleware/auth";
 import { TaskRepositoryService } from "../repositories/tasks/tasks-repository.service";
 import { WorkspaceMemberService } from "../service/workspace-member.service";
 import { WorkspaceMemberRepository } from "../repositories/workspace-members/workspace-member-repository.service";
-import { TaskDto } from "../repositories/dto/TaskDto";
+import { CreateTaskDto } from "../repositories/dto/CreateTaskDto";
+import { UpdateTaskDto } from "../repositories/dto/UpdateTaskDto";
+import { TaskResponseDto } from "../repositories/dto/TaskResponseDto";
 
 export class TaskController {
   public router = Router();
   private taskService = new TaskService(
-    new TaskRepositoryService(),
     new WorkspaceMemberService(new WorkspaceMemberRepository()),
   );
 
@@ -26,6 +27,7 @@ export class TaskController {
     );
     this.router.put(
       "/workspaces/:workspaceId/tasks/:taskId",
+      verifyToken,
       this.update.bind(this),
     );
     this.router.delete(
@@ -57,31 +59,24 @@ export class TaskController {
 
   private async create(req: AuthenticatedRequest, res: Response) {
     try {
-      const data = req.body;
       const workspaceId = parseInt(req.params.workspaceId);
-  
-      //const taskData = new TaskDto({ data, workspaceId, createdById: req.user.id });
-      const newTask = await this.taskService.createTask(
-        {data, workspaceId, createdById: req.user.id}}
-      );
-      console.log(newTask);
-      if (!newTask) {
-        return res.status(400).json({ message: "Task creation failed" });
-      }
-      res.status(201).json(newTask);
+      const createTaskDto = new CreateTaskDto({ ...req.body, workspaceId, createdById: req.user.id });
+      console.log("createTaskDto", createTaskDto);
+      const newTask = await this.taskService.createTask(createTaskDto, createTaskDto.createdById);
+      const responseDto = new TaskResponseDto(newTask);
+      res.status(201).json(responseDto);
     } catch (err) {
       res.status(400).json({ message: err.message });
     }
   }
 
-  private async update(req: Request, res: Response) {
+  private async update(req: AuthenticatedRequest, res: Response) {
     try {
       const taskId = parseInt(req.params.taskId);
-      const updateData = req.body;
-      const updatedTask = await this.taskService.updateTask(
-        new TaskDto({ ...updateData, id: taskId }),
-      );
-      res.status(200).json(updatedTask);
+      const updateTaskDto = new UpdateTaskDto({ ...req.body, id: taskId });
+      const updatedTask = await this.taskService.updateTask(updateTaskDto);
+      const responseDto = new TaskResponseDto(updatedTask);
+      res.status(200).json(responseDto);
     } catch (err) {
       res.status(400).json({ message: err.message });
     }
