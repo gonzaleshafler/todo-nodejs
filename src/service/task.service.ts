@@ -31,7 +31,8 @@ export class TaskService {
   }
 
   async getTasksByWorkspaceId(workspaceId: number) {
-    return this.taskRepository.getByWorkspaceId(workspaceId);
+
+    return await this.taskRepository.getByWorkspaceId(workspaceId);
   }
 
   async createTask(createTaskDto: CreateTaskDto, userId: number): Promise<Task> {

@@ -1,4 +1,5 @@
 
+import { get } from "http";
 import { CreateTaskDto } from "../dto/CreateTaskDto";
 import { UpdateTaskDto } from "../dto/UpdateTaskDto";
 import { Task } from "../entities/task";
@@ -7,11 +8,13 @@ import { GetTaskById } from "./use-cases/get-task-by-id.usecase";
 import { GetTaskByAssignedUserId } from "./use-cases/get-tasks-by-assigned-user-id.usecase";
 import { GetTaskByCreatorUserId } from "./use-cases/get-tasks-by-creator-id.usecase";
 import { UpdateTaskById } from "./use-cases/update-task-by-id.usecase";
+import { GetTasksByWorkspaceId } from "./use-cases/get-tasks-by-workspace-id.usecase";
 
 
 export class TaskRepositoryService {
   private createTaskUseCase :  CreateTaskUseCase;
   private getTasksByAssignedUserId :  GetTaskByAssignedUserId;
+  private getTaskByWorkspaceId :  GetTasksByWorkspaceId;
   private getTasksByCreatorUserId :  GetTaskByCreatorUserId;
   private getTaskById :  GetTaskById;
   private updateTaskById :  UpdateTaskById;
@@ -19,6 +22,7 @@ export class TaskRepositoryService {
     this.createTaskUseCase = new CreateTaskUseCase();
     this.getTasksByAssignedUserId = new GetTaskByAssignedUserId();
     this.getTasksByCreatorUserId = new GetTaskByCreatorUserId();
+    this.getTaskByWorkspaceId = new GetTasksByWorkspaceId();
     this.getTaskById = new GetTaskById();
     this.updateTaskById = new UpdateTaskById();
   }
@@ -34,7 +38,7 @@ export class TaskRepositoryService {
 
   async getByWorkspaceId(workspaceId: number)
   {
-    return this.getTasksByAssignedUserId.exec(workspaceId);
+    return this.getTaskByWorkspaceId.exec(workspaceId);
   }
   async getById(id: number)
   {

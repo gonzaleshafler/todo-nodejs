@@ -5,6 +5,14 @@ export class GetTasksByWorkspaceId {
   private taskRepository = AppDataSource.getRepository(Task);
 
   async exec(workspaceId: number) {
-    return await this.taskRepository.findBy({ workspace: { id: workspaceId } });
+    return await this.taskRepository.find({
+      where: {
+        workspace: { id: workspaceId },
+        parentTask: null, 
+      },
+      relations: {
+        subTasks: true, 
+      },
+    });
   }
 }

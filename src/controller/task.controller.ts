@@ -11,37 +11,44 @@ import { checkAccess } from "../middleware/access";
 
 export class TaskController {
   public router = Router();
-  private taskService = new TaskService(
-    new WorkspaceMemberService(new WorkspaceMemberRepository()),
-  );
 
-  constructor() {
+  constructor(private readonly taskService: TaskService) {
     this.router.post(
       "/workspaces/:workspaceId/tasks",
       verifyToken,
       this.create.bind(this),
     );
-    this.router.get("/workspaces/:workspaceId/tasks", this.getAll.bind(this));
+    this.router.get(
+      "/workspaces/:workspaceId/tasks",
+      verifyToken,
+      checkAccess,
+      this.getAll.bind(this),
+    );
     this.router.get(
       "/workspaces/:workspaceId/tasks/:taskId",
+      verifyToken,
+      checkAccess,
       this.getById.bind(this),
     );
     this.router.put(
       "/workspaces/:workspaceId/tasks/:taskId",
-      verifyToken,checkAccess,
+      verifyToken,
+      checkAccess,
       this.update.bind(this),
     );
     this.router.delete(
       "/workspaces/:workspaceId/tasks/:taskId",
+      verifyToken,
+      checkAccess,
       this.delete.bind(this),
     );
   }
 
   private async getAll(req: Request, res: Response) {
     try {
-      const workspaceId = parseInt(req.params.workspaceId);
-
-      const tasks = await this.taskService.getTasksByWorkspaceId(workspaceId);
+      const tasks = await this.taskService.getTasksByWorkspaceId(
+        parseInt(req.params.workspaceId),
+      );
       res.status(200).json(tasks);
     } catch (err) {
       res.status(500).json({ message: err.message });
@@ -60,8 +67,21 @@ export class TaskController {
 
   private async create(req: AuthenticatedRequest, res: Response) {
     try {
-      const createTaskDto = new CreateTaskDto({ ...req.body, workspaceId: req.params.workspaceId, createdById: req.user.id });
-      res.status(201).json(new TaskResponseDto(await this.taskService.createTask(createTaskDto, createTaskDto.createdById)));
+      const createTaskDto = new CreateTaskDto({
+        ...req.body,
+        workspaceId: req.params.workspaceId,
+        createdById: req.user.id,
+      });
+      res
+        .status(201)
+        .json(
+          new TaskResponseDto(
+            await this.taskService.createTask(
+              createTaskDto,
+              createTaskDto.createdById,
+            ),
+          ),
+        );
     } catch (err) {
       res.status(400).json({ message: err.message });
     }
@@ -69,8 +89,16 @@ export class TaskController {
 
   private async update(req: AuthenticatedRequest, res: Response) {
     try {
-      const updateTaskDto = new UpdateTaskDto({ id: req.params.taskId, ...req.body, createdById: req.user.id });
-      res.status(200).json(new TaskResponseDto(await this.taskService.updateTask(updateTaskDto)));
+      const updateTaskDto = new UpdateTaskDto({
+        id: req.params.taskId,
+        ...req.body,
+        createdById: req.user.id,
+      });
+      res
+        .status(200)
+        .json(
+          new TaskResponseDto(await this.taskService.updateTask(updateTaskDto)),
+        );
     } catch (err) {
       res.status(400).json({ message: err.message });
     }

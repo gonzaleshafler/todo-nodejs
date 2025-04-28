@@ -10,6 +10,7 @@ import { WorkspaceService } from "./service/workspace.service";
 import { WorkspaceRepositoryService} from "./repositories/workspaces/workspace-repository.service";
 import { WorkspaceMemberService } from "./service/workspace-member.service";
 import { WorkspaceMemberRepository } from "./repositories/workspace-members/workspace-member-repository.service";
+import { TaskService } from "./service/task.service";
 
 const app = express();
 app.use(express.json());
@@ -33,7 +34,7 @@ const workspaceService = new WorkspaceService(new WorkspaceRepositoryService(), 
 const workspaceController = new WorkspaceController(workspaceService);
 app.use("/workspaces", workspaceController.router);
 
-const taskController = new TaskController();
+const taskController = new TaskController(new TaskService(workspaceMemberService));
 app.use("/", taskController.router);
 // app.get("/", (req, res) => {
 //   const toDoRep = AppDataSource.getRepository(ToDo);

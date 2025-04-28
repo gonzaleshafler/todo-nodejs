@@ -5,6 +5,11 @@ export class GetTaskById {
   private taskRepository = AppDataSource.getRepository(Task);
 
   async exec(id: number) {
-    return await this.taskRepository.findBy({ id });
+    return await this.taskRepository.findOne({
+      where: { id: id },
+      relations: {
+        subTasks: true,
+      },
+    });
   }
 }
