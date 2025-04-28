@@ -10,13 +10,9 @@ import { UpdateTaskDto } from "../repositories/dto/UpdateTaskDto";
 import { WorkspaceMemberRepository } from "../repositories/workspace-members/workspace-member-repository.service";
 
 export class TaskService {
-  private taskRepository = new TaskRepositoryService();
 
-  constructor(
-    private workspaceMemberService: WorkspaceMemberService,
-  ) {
-    
-  }
+  constructor(private readonly taskRepository: TaskRepositoryService) {}
+
 
   async getTaskById(id: number) {
     return this.taskRepository.getById(id);
@@ -58,6 +54,7 @@ export class TaskService {
   }
 
   async deleteTask(id: number) {
+    return this.taskRepository.delete(id);
     // const todo = await this.taskRepository.findOneBy({ id });
     // if (!todo) {
     //   throw new Error("Task not found");

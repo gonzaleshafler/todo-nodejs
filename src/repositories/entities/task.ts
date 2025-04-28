@@ -32,15 +32,12 @@ export class Task {
   @CreateDateColumn({ type: "timestamp" })
   createdAt: Date;
 
-  
-
-  @ManyToOne(() => Task, (task) => task.subTasks)
-  @JoinColumn({ name: "parent_task_id" })
+  @ManyToOne(() => Task, (task) => task.subTasks, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'parent_task_id' })
   parentTask: Task;
-
-  @OneToMany(() => Task, (task) => task.parentTask)
+  
+  @OneToMany(() => Task, (task) => task.parentTask, { cascade: ['remove'] })
   subTasks: Task[];
-
   @ManyToOne(() => Workspace, (workspace) => workspace.tasks, {
     onDelete: "CASCADE",
   })
@@ -53,9 +50,8 @@ export class Task {
   @JoinColumn({ name: "created_by" })
   createdBy: WorkspaceMember | null;
 
-  @ManyToOne(()=>WorkspaceMember,{nullable:true})
-  @JoinColumn({name:"assigned_to"})
-  assignedTo:WorkspaceMember|null;
-  task: { id: number; };
-  
+  @ManyToOne(() => WorkspaceMember, { nullable: true })
+  @JoinColumn({ name: "assigned_to" })
+  assignedTo: WorkspaceMember | null;
+  task: { id: number };
 }
