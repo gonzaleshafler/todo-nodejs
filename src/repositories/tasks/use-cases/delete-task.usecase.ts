@@ -16,11 +16,11 @@ export class DeleteTask {
       throw new Error(`Task with id ${id} not found`);
     }
 
- 
     if (task.subTasks && task.subTasks.length > 0) {
-      await this.taskRepository.delete(task.subTasks.map(subtask => subtask.id));
+      await this.taskRepository.delete(
+        task.subTasks.map((subtask) => subtask.id),
+      );
     }
-
 
     return await this.taskRepository.remove(task);
   }

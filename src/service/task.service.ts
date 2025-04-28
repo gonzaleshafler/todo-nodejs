@@ -32,20 +32,18 @@ export class TaskService {
   }
 
   async createTask(createTaskDto: CreateTaskDto, userId: number): Promise<Task> {
-// Fetch the WorkspaceMember for the current user in the workspace
     const workspaceMembers = await new WorkspaceMemberRepository().getMembershipsById(createTaskDto.workspaceId);
     const member = workspaceMembers.find((m) => m.user.id === userId);
-
+    if(!await this.taskRepository.getById(createTaskDto.parentTaskId)) {
+      throw new Error("Parent task not found");
+    }
     if (!member) {
       throw new Error("User is not a member of the workspace");
     }
 
     // Update the DTO with the WorkspaceMember ID
     createTaskDto.createdById = member.id;
-
-   
-    const task = await this.taskRepository.create(createTaskDto);
-    return task;
+    return await this.taskRepository.create(createTaskDto);
   }
 
   async updateTask(updateTaskDto: UpdateTaskDto): Promise<Task> {
@@ -55,10 +53,5 @@ export class TaskService {
 
   async deleteTask(id: number) {
     return this.taskRepository.delete(id);
-    // const todo = await this.taskRepository.findOneBy({ id });
-    // if (!todo) {
-    //   throw new Error("Task not found");
-    // }
-    // return this.taskRepository.remove(todo);
   }
 }
